@@ -12,6 +12,7 @@ import {
     FlatList,
     Modal,
     TouchableHighlight,
+    Share
 } from 'react-native';
 
 import {
@@ -35,7 +36,7 @@ const DEMO_OPTIONS_2 = [
     { "name": "Flavour 6", },
 ];
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons ,Entypo} from '@expo/vector-icons';
 import { ToastAndroid } from 'react-native';
 import { getAllOfCollection } from './firbase/utility';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -183,6 +184,93 @@ export default class CreateNewRecipie extends Component {
     }  
 
     }
+    onShare = async (item) => {
+       //console.log("HIEGEGE",item)
+        try {
+          let datahtml = `
+    Recipie name : ${item[0].recipieName} 
+    `;
+          let data = "";
+          {
+            item.map((element, index) => {
+              data =
+                data +
+                "\n" +
+                "Flavour  " +
+                [index + 1] +
+                " : " +
+                element.flavour +
+                "\nFlavour Amount: " +
+                (element.Famount / 100) * 30 +
+                "ml - " +element.Famount + "%";
+            });
+          }
+          console.log("Test pakis ",  datahtml + data,);
+          const result = await Share.share({
+            message: datahtml + data,
+          });
+         
+          if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+              // shared with activity type of result.activityType
+            } else {
+              // shared
+            }
+          } else if (result.action === Share.dismissedAction) {
+            // dismissed
+          }
+        } catch (error) {
+          alert(error.message);
+        }
+      };
+
+
+    shareRecipie = async () => {
+        if(this.state.recipieName){
+            const { comments } = this.state;
+            this.setState({ comments });
+            comments[0].recipieName=this.state.recipieName
+            this.setState({ comments });
+            const total = this.state.comments.reduce((acc, curr) =>
+            acc + parseFloat(curr.Famount), 0) / 100 * 30
+        if (total) {
+            if (total > 30) {
+                ToastAndroid.show("Recipie flavour should be less then 30ml", ToastAndroid.SHORT)
+            }
+            else {
+               // const allRecipie = await AsyncStorage.getItem('allRecipie');
+                //if (allRecipie) {
+                  //  const allRecipie1 = JSON.parse(allRecipie)
+                   // console.log("first")
+                     //allRecipie1.push(this.state.comments)
+                     this.onShare(this.state.comments)
+                     //await AsyncStorage.setItem('allRecipie', JSON.stringify(allRecipie1))
+                   // await this.setState({ comments: [],recipieName:'' })
+                    //ToastAndroid.show("New recipie is saved", ToastAndroid.SHORT)
+              //  }
+                //else {
+                  //  const allRecipie = [];
+                   // allRecipie.push(this.state.comments)
+
+                    //this.onShare(this.state.comments)
+                    //await AsyncStorage.setItem('allRecipie', JSON.stringify(allRecipie))
+                   // await this.setState({ comments: [] ,recipieName:''})
+                    //ToastAndroid.show("New recipie is saved", ToastAndroid.SHORT)
+               // }
+            }
+        }
+        else {
+            ToastAndroid.show("No flavour is added in recipie yet", ToastAndroid.SHORT)
+
+        }
+    }
+    else{
+        ToastAndroid.show("Please type recipie name before saving", ToastAndroid.LONG)
+    }  
+
+    }
+  
+    
     getNewDimensions= async (event)=>{
         
        await this.setState({
@@ -554,7 +642,23 @@ export default class CreateNewRecipie extends Component {
                         </View>
 
                     </View>
-
+                <View style={{ flexDirection: 'row',justifyContent:'space-between'}}>                    
+                    <TouchableOpacity
+                        onPress={() => this.shareRecipie()}
+                        style={{
+                            flexDirection: 'row',
+                            backgroundColor: '#202020',
+                            width: responsiveWidth(25),
+                            height: responsiveHeight(7),
+                            alignSelf: 'flex-end',
+                            margin: responsiveHeight(2),
+                            justifyContent: 'center', 
+                            alignContent: 'center', alignItems: 'center',
+                            borderRadius: responsiveHeight(2), marginBottom: responsiveHeight(2)
+                        }}>
+                        <Entypo name="share" size={24} color="white" />
+                        <Text style={{ color: 'white', fontSize: 17 }}>Share</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => this.saveRecipie()}
                         style={{
@@ -563,8 +667,11 @@ export default class CreateNewRecipie extends Component {
                             height: responsiveHeight(7),
                             alignSelf: 'flex-end',
                             margin: responsiveHeight(2),
-                            justifyContent: 'center', alignContent: 'center', alignItems: 'center',
-                            borderRadius: responsiveHeight(2), marginBottom: responsiveHeight(2)
+                            justifyContent: 'center', 
+                            alignContent: 'center', 
+                            alignItems: 'center',
+                            borderRadius: responsiveHeight(2), 
+                            marginBottom: responsiveHeight(2)
                         }}>
                         <Image
                             source={require('../assets/FattyFogAssesst/fluent_save_24_filled.png')}
@@ -572,6 +679,8 @@ export default class CreateNewRecipie extends Component {
                         />
                         <Text style={{ color: 'white', fontSize: 17 }}>Save</Text>
                     </TouchableOpacity>
+</View>
+
                     {/* </View> */}
                 </ScrollView>
             </>

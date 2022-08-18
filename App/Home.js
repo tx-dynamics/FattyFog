@@ -80,9 +80,9 @@ Recipie name : ${item[0].recipieName}
             [index + 1] +
             " : " +
             element.flavour +
-            "\nFlavour Amount : " +
+            "\nFlavour Amount: " +
             (element.Famount / 100) * 30 +
-            "ml";
+            "ml - " +element.Famount + "%";
         });
       }
 
